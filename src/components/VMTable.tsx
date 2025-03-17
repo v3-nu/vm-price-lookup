@@ -2,9 +2,9 @@
 import { useState, useMemo } from 'react';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Button } from "@/components/ui/button";
 import { VMPricing } from '@/data/vmData';
 import PriceTag from './PriceTag';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 interface VMTableProps {
   data: VMPricing[];
@@ -16,6 +16,8 @@ type SortOrder = 'asc' | 'desc';
 const VMTable: React.FC<VMTableProps> = ({ data }) => {
   const [sortKey, setSortKey] = useState<SortKey>('price');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -43,6 +45,21 @@ const VMTable: React.FC<VMTableProps> = ({ data }) => {
     });
   }, [data, sortKey, sortOrder]);
 
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedData = sortedData.slice(startIndex, startIndex + pageSize);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
   const renderSortIcon = (key: SortKey) => {
     if (sortKey !== key) return null;
     
@@ -64,6 +81,54 @@ const VMTable: React.FC<VMTableProps> = ({ data }) => {
   const item = {
     hidden: { opacity: 0, y: 5 },
     show: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+  };
+
+  // Generate page numbers for pagination
+  const generatePagination = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      // If we have fewer pages than the max, show all pages
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show first page, last page, current page, and pages around current
+      pages.push(1);
+      
+      let startPage = Math.max(2, currentPage - 1);
+      let endPage = Math.min(totalPages - 1, currentPage + 1);
+      
+      // Adjust if we're near the beginning or end
+      if (currentPage <= 2) {
+        endPage = 4;
+      } else if (currentPage >= totalPages - 1) {
+        startPage = totalPages - 3;
+      }
+      
+      // Add ellipsis if needed
+      if (startPage > 2) {
+        pages.push('ellipsis');
+      }
+      
+      // Add the middle pages
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      // Add ellipsis if needed
+      if (endPage < totalPages - 1) {
+        pages.push('ellipsis');
+      }
+      
+      // Add the last page
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
   };
 
   return (
@@ -140,7 +205,7 @@ const VMTable: React.FC<VMTableProps> = ({ data }) => {
             initial="hidden"
             animate="show"
           >
-            {sortedData.map((vm) => (
+            {paginatedData.map((vm) => (
               <motion.tr 
                 key={vm.id} 
                 variants={item}
@@ -166,8 +231,65 @@ const VMTable: React.FC<VMTableProps> = ({ data }) => {
         </table>
       </div>
       
-      <div className="text-center mt-4 text-sm text-gray-500">
-        Showing {sortedData.length} virtual machines
+      <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="text-sm text-gray-500">
+          Showing {startIndex + 1} to {Math.min(startIndex + pageSize, sortedData.length)} of {sortedData.length} virtual machines
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="pageSize" className="text-sm font-medium text-gray-700">
+              Show
+            </label>
+            <select
+              id="pageSize"
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              className="h-8 pl-2 pr-8 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+          
+          {totalPages > 1 && (
+            <Pagination>
+              <PaginationContent>
+                {currentPage > 1 && (
+                  <PaginationItem>
+                    <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+                  </PaginationItem>
+                )}
+                
+                {generatePagination().map((page, index) => (
+                  page === 'ellipsis' ? (
+                    <PaginationItem key={`ellipsis-${index}`}>
+                      <span className="flex h-9 w-9 items-center justify-center">...</span>
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={`page-${page}`}>
+                      <PaginationLink
+                        isActive={currentPage === page}
+                        onClick={() => handlePageChange(page as number)}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                ))}
+                
+                {currentPage < totalPages && (
+                  <PaginationItem>
+                    <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          )}
+        </div>
       </div>
     </div>
   );

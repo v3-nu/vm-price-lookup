@@ -40,7 +40,7 @@ const Index = () => {
 
       return true;
     });
-  }, [vmData, filters]);
+  }, [filters]);
 
   const pageVariants = {
     initial: { opacity: 0 },
