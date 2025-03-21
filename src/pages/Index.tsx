@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -12,9 +11,8 @@ import { toast } from 'sonner';
 
 const fetchVMData = async (): Promise<VMPricing[]> => {
   try {
-    console.log('Fetching data from Supabase...');
+    console.log('Fetching data from Supabase PricingList table...');
     
-    // Only fetch from PricingList table
     const { data: pricingData, error: pricingError } = await supabase
       .from('PricingList')
       .select('*');
@@ -24,17 +22,29 @@ const fetchVMData = async (): Promise<VMPricing[]> => {
       throw new Error('Failed to fetch data from PricingList table');
     }
     
-    console.log('Data from PricingList:', pricingData);
+    // More detailed logging to help debug
+    console.log(`Received ${pricingData?.length || 0} rows from PricingList table`);
+    if (pricingData && pricingData.length > 0) {
+      console.log('First row sample:', pricingData[0]);
+    } else {
+      console.log('No data returned from PricingList table');
+    }
     
     // If we get an empty array but no error, use sample data
     if (!pricingData || pricingData.length === 0) {
       console.log('No data found in PricingList, using sample data');
-      // If no data is found in Supabase, use sample data from vmData.ts
       return import('../data/vmData').then(module => module.vmData);
     }
     
-    // Convert the data to our app's format - use type assertion with unknown first
-    return ((pricingData as unknown) as SupabaseVMPricing[]).map(convertToVMPricing);
+    console.log('Converting Supabase data to application format...');
+    // Convert the data to our app's format - use type casting
+    const convertedData = pricingData.map(row => {
+      // Cast each row to SupabaseVMPricing type
+      return convertToVMPricing(row as unknown as SupabaseVMPricing);
+    });
+    
+    console.log(`Successfully converted ${convertedData.length} rows`);
+    return convertedData;
   } catch (error) {
     console.error('Error fetching VM data:', error);
     console.log('Falling back to sample data due to error');
