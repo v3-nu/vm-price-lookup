@@ -187,10 +187,27 @@ const VMTable: React.FC<VMTableProps> = ({ data }) => {
                       {renderSortIcon('price')}
                     </div>
                   </th>
-                  <th className="cursor-pointer text-right" onClick={() => handleSort('priceEUR')}>
+                  <th className="cursor-pointer text-right" onClick={() => handleSort('priceeur')}>
                     <div className="flex items-center justify-end">
                       Price (€)
-                      {renderSortIcon('priceEUR')}
+                      {renderSortIcon('priceeur')}
+                    </div>
+                  </th>
+                  <th className="cursor-pointer text-right" onClick={() => handleSort('price25vat')}>
+                    <div className="flex items-center justify-end">
+                      Price (25% VAT)
+                      {renderSortIcon('price25vat')}
+                    </div>
+                  </th>
+                  <th className="cursor-pointer text-right" onClick={() => handleSort('priceratio')}>
+                    <div className="flex items-center justify-end">
+                      Price Ratio
+                      {renderSortIcon('priceratio')}
+                    </div>
+                  </th>
+                  <th className="cursor-pointer text-right" onClick={() => handleSort('comments')}>
+                    <div className="flex items-center justify-end">
+                      Comments
                     </div>
                   </th>
                 </tr>
@@ -203,7 +220,7 @@ const VMTable: React.FC<VMTableProps> = ({ data }) => {
               >
                 {paginatedData.map((vm) => (
                   <motion.tr 
-                    key={vm.id} 
+                    key={vm.key} 
                     variants={item}
                     className="hover:bg-gray-50 transition-colors"
                   >
@@ -219,7 +236,16 @@ const VMTable: React.FC<VMTableProps> = ({ data }) => {
                       <PriceTag price={vm.price} currency={vm.currency} />
                     </td>
                     <td className="text-right">
-                      <PriceTag price={vm.priceEUR} currency="€" />
+                      <PriceTag price={vm.priceeur} currency="€" />
+                    </td>
+                    <td className="text-right">
+                      <PriceTag price={vm.price25vat} currency="€" />
+                    </td>
+                    <td className="text-right">
+                      <PriceTag price={vm.priceratio} currency="€" />
+                    </td>
+                    <td className="text-right">
+                      {vm.comments}
                     </td>
                   </motion.tr>
                 ))}

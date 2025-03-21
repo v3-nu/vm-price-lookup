@@ -48,7 +48,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
     
     const maxCPUValue = Math.max(...data.map(vm => vm.cpu));
     const maxRAMValue = Math.max(...data.map(vm => vm.ram));
-    const maxPriceValue = Math.max(...data.map(vm => vm.priceEUR));
+    const maxPriceValue = Math.max(...data.map(vm => vm.priceeur));
 
     return {
       providers: uniqueProviders.filter(Boolean).sort(),
