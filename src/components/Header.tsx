@@ -36,7 +36,9 @@ const Header = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
-            Compare specifications and pricing across different cloud providers to find the best option for your needs.
+            Compare pricing and specifications across different eu-based (or non-eu based with datacenters in the EU) cloud providers. Feel free to open pull requests on the Github repo to add providers, correct inaccuracies or write a frontend that isn't AI-generated - I'm more of a data person than a frontend person (obviously).<br/>
+            A note regarding the data - It is likely not 100% accurate, but it is a good starting point. I will add some more data in the coming days, among others the datacenter locations for each provider.<br/>
+            Github repo: <a href="https://github.com/johan-gustafsson/eu-cloud-pricing" target="_blank" rel="noopener noreferrer">https://github.com/v3-nu/vm-price-lookup</a>
           </motion.p>
         </div>
       </div>
