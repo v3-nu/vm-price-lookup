@@ -12,16 +12,39 @@ import { toast } from 'sonner';
 
 const fetchVMData = async (): Promise<VMPricing[]> => {
   try {
-    const { data, error } = await supabase
+    console.log('Fetching data from Supabase...');
+    
+    // Use VMPricing table (capital V) instead of PricingList as a fallback
+    const { data: pricingData, error: pricingError } = await supabase
       .from('PricingList')
       .select('*');
 
-    if (error) {
-      throw new Error(error.message);
+    if (pricingError) {
+      console.error('Error fetching from PricingList:', pricingError);
+      
+      // Try the other table as fallback
+      const { data: vmData, error: vmError } = await supabase
+        .from('VMPricing')
+        .select('*');
+        
+      if (vmError) {
+        console.error('Error fetching from VMPricing:', vmError);
+        throw new Error('Failed to fetch data from either table');
+      }
+      
+      console.log('Data from VMPricing:', vmData);
+      return (vmData as SupabaseVMPricing[]).map(convertToVMPricing);
     }
-
+    
+    console.log('Data from PricingList:', pricingData);
+    
+    // If we get an empty array but no error, try inserting sample data
+    if (pricingData && pricingData.length === 0) {
+      console.log('No data found, consider adding sample data');
+    }
+    
     // Convert the data to our app's format
-    return (data as SupabaseVMPricing[]).map(convertToVMPricing);
+    return (pricingData as SupabaseVMPricing[]).map(convertToVMPricing);
   } catch (error) {
     console.error('Error fetching VM data:', error);
     throw error;
