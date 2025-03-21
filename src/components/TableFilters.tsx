@@ -4,6 +4,8 @@ import { SearchIcon, X, Filter } from 'lucide-react';
 import { VMPricing } from '@/data/vmData';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TableFiltersProps {
@@ -11,7 +13,10 @@ interface TableFiltersProps {
     search: string;
     provider: string | null;
     minCPU: number | null;
+    maxRAM: number | null;
     maxPrice: number | null;
+    processor: string | null;
+    resources: string | null;
   }) => void;
   data: VMPricing[];
 }
@@ -21,44 +26,152 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
   const [showFilters, setShowFilters] = useState(false);
   const [provider, setProvider] = useState<string | null>(null);
   const [minCPU, setMinCPU] = useState<number | null>(null);
+  const [maxRAM, setMaxRAM] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [processor, setProcessor] = useState<string | null>(null);
+  const [resources, setResources] = useState<string | null>(null);
 
-  // Extract all unique providers from data
-  const providers = useMemo(() => {
-    if (!data.length) return [];
+  // Extract unique values from data for filters
+  const filterData = useMemo(() => {
+    if (!data.length) return {
+      providers: [],
+      processors: [],
+      resourcesTypes: [],
+      maxCPUValue: 0,
+      maxRAMValue: 0,
+      maxPriceValue: 0
+    };
+
     const uniqueProviders = Array.from(new Set(data.map(vm => vm.provider)));
-    return uniqueProviders.filter(Boolean).sort();
+    const uniqueProcessors = Array.from(new Set(data.map(vm => vm.processor)));
+    const uniqueResources = Array.from(new Set(data.map(vm => vm.resources)));
+    
+    const maxCPUValue = Math.max(...data.map(vm => vm.cpu));
+    const maxRAMValue = Math.max(...data.map(vm => vm.ram));
+    const maxPriceValue = Math.max(...data.map(vm => vm.priceEUR));
+
+    return {
+      providers: uniqueProviders.filter(Boolean).sort(),
+      processors: uniqueProcessors.filter(Boolean).sort(),
+      resourcesTypes: uniqueResources.filter(Boolean).sort(),
+      maxCPUValue: Math.ceil(maxCPUValue),
+      maxRAMValue: Math.ceil(maxRAMValue),
+      maxPriceValue: Math.ceil(maxPriceValue)
+    };
   }, [data]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
-    onFilterChange({ search: value, provider, minCPU, maxPrice });
+    onFilterChange({ 
+      search: value, 
+      provider, 
+      minCPU, 
+      maxRAM, 
+      maxPrice, 
+      processor, 
+      resources 
+    });
   };
 
   const handleProviderChange = (value: string | null) => {
     setProvider(value);
-    onFilterChange({ search, provider: value, minCPU, maxPrice });
+    onFilterChange({ 
+      search, 
+      provider: value, 
+      minCPU, 
+      maxRAM, 
+      maxPrice, 
+      processor, 
+      resources 
+    });
+  };
+
+  const handleProcessorChange = (value: string | null) => {
+    setProcessor(value);
+    onFilterChange({ 
+      search, 
+      provider, 
+      minCPU, 
+      maxRAM, 
+      maxPrice, 
+      processor: value, 
+      resources 
+    });
+  };
+
+  const handleResourcesChange = (value: string | null) => {
+    setResources(value);
+    onFilterChange({ 
+      search, 
+      provider, 
+      minCPU, 
+      maxRAM, 
+      maxPrice, 
+      processor, 
+      resources: value 
+    });
   };
 
   const handleMinCPUChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value ? Number(e.target.value) : null;
     setMinCPU(value);
-    onFilterChange({ search, provider, minCPU: value, maxPrice });
+    onFilterChange({ 
+      search, 
+      provider, 
+      minCPU: value, 
+      maxRAM, 
+      maxPrice, 
+      processor, 
+      resources 
+    });
+  };
+
+  const handleMaxRAMChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value ? Number(e.target.value) : null;
+    setMaxRAM(value);
+    onFilterChange({ 
+      search, 
+      provider, 
+      minCPU, 
+      maxRAM: value, 
+      maxPrice, 
+      processor, 
+      resources 
+    });
   };
 
   const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value ? Number(e.target.value) : null;
     setMaxPrice(value);
-    onFilterChange({ search, provider, minCPU, maxPrice: value });
+    onFilterChange({ 
+      search, 
+      provider, 
+      minCPU, 
+      maxRAM, 
+      maxPrice: value, 
+      processor, 
+      resources 
+    });
   };
 
   const resetFilters = () => {
     setSearch("");
     setProvider(null);
     setMinCPU(null);
+    setMaxRAM(null);
     setMaxPrice(null);
-    onFilterChange({ search: "", provider: null, minCPU: null, maxPrice: null });
+    setProcessor(null);
+    setResources(null);
+    onFilterChange({ 
+      search: "", 
+      provider: null, 
+      minCPU: null, 
+      maxRAM: null, 
+      maxPrice: null, 
+      processor: null, 
+      resources: null 
+    });
   };
 
   useEffect(() => {
@@ -66,9 +179,14 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
       search,
       provider: provider === '' ? null : provider,
       minCPU: minCPU === null ? null : Number(minCPU),
+      maxRAM: maxRAM === null ? null : Number(maxRAM),
       maxPrice: maxPrice === null ? null : Number(maxPrice),
+      processor: processor === '' ? null : processor,
+      resources: resources === '' ? null : resources,
     });
-  }, [search, provider, minCPU, maxPrice, onFilterChange]);
+  }, [search, provider, minCPU, maxRAM, maxPrice, processor, resources, onFilterChange]);
+
+  const hasActiveFilters = search || provider || minCPU || maxRAM || maxPrice || processor || resources;
 
   return (
     <div className="mb-6 space-y-4">
@@ -85,7 +203,15 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
             <button
               onClick={() => {
                 setSearch("");
-                onFilterChange({ search: "", provider, minCPU, maxPrice });
+                onFilterChange({ 
+                  search: "", 
+                  provider, 
+                  minCPU, 
+                  maxRAM, 
+                  maxPrice, 
+                  processor, 
+                  resources 
+                });
               }}
               className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
             >
@@ -100,10 +226,10 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
           onClick={() => setShowFilters(!showFilters)}
         >
           <Filter className="h-4 w-4" />
-          <span>Filters</span>
+          <span>Filters {hasActiveFilters ? '(Active)' : ''}</span>
         </Button>
         
-        {(search || provider || minCPU || maxPrice) && (
+        {hasActiveFilters && (
           <Button
             variant="ghost"
             className="h-10 px-4 text-gray-600 hover:bg-gray-50 transition-colors"
@@ -124,53 +250,108 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-md border border-gray-100">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Provider
-                </label>
-                <select
-                  value={provider || ""}
-                  onChange={(e) => handleProviderChange(e.target.value || null)}
-                  className="w-full h-10 px-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
-                >
-                  <option value="">All Providers</option>
-                  {providers.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
+            <div className="p-4 bg-gray-50 rounded-md border border-gray-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-1">
+                    Provider
+                  </Label>
+                  <select
+                    value={provider || ""}
+                    onChange={(e) => handleProviderChange(e.target.value || null)}
+                    className="w-full h-10 px-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
+                  >
+                    <option value="">All Providers</option>
+                    {filterData.providers.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-1">
+                    Processor
+                  </Label>
+                  <select
+                    value={processor || ""}
+                    onChange={(e) => handleProcessorChange(e.target.value || null)}
+                    className="w-full h-10 px-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
+                  >
+                    <option value="">All Processors</option>
+                    {filterData.processors.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-1">
+                    Resources
+                  </Label>
+                  <select
+                    value={resources || ""}
+                    onChange={(e) => handleResourcesChange(e.target.value || null)}
+                    className="w-full h-10 px-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
+                  >
+                    <option value="">All Resource Types</option>
+                    {filterData.resourcesTypes.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Min CPU Cores
-                </label>
-                <Input
-                  type="number"
-                  placeholder="Min CPU"
-                  value={minCPU ?? ""}
-                  onChange={handleMinCPUChange}
-                  min={0}
-                  step={0.25}
-                  className="w-full h-10 px-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Price (€)
-                </label>
-                <Input
-                  type="number"
-                  placeholder="Max Price"
-                  value={maxPrice ?? ""}
-                  onChange={handleMaxPriceChange}
-                  min={0}
-                  step={1}
-                  className="w-full h-10 px-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-1">
+                    Min CPU Cores: {minCPU ?? 'Any'}
+                  </Label>
+                  <Input
+                    type="number"
+                    placeholder="Min CPU"
+                    value={minCPU ?? ""}
+                    onChange={handleMinCPUChange}
+                    min={0}
+                    step={0.25}
+                    className="w-full h-10 px-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-1">
+                    Max RAM (GB): {maxRAM ?? 'Any'}
+                  </Label>
+                  <Input
+                    type="number"
+                    placeholder="Max RAM"
+                    value={maxRAM ?? ""}
+                    onChange={handleMaxRAMChange}
+                    min={0}
+                    step={1}
+                    className="w-full h-10 px-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-1">
+                    Max Price (€): {maxPrice ?? 'Any'}
+                  </Label>
+                  <Input
+                    type="number"
+                    placeholder="Max Price"
+                    value={maxPrice ?? ""}
+                    onChange={handleMaxPriceChange}
+                    min={0}
+                    step={1}
+                    className="w-full h-10 px-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
+                  />
+                </div>
               </div>
             </div>
           </motion.div>

@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -58,7 +59,10 @@ const Index = () => {
     search: '',
     provider: null as string | null,
     minCPU: null as number | null,
+    maxRAM: null as number | null,
     maxPrice: null as number | null,
+    processor: null as string | null,
+    resources: null as string | null,
   });
 
   const { data: vmData = [], isLoading, error } = useQuery({
@@ -93,9 +97,24 @@ const Index = () => {
       if (filters.minCPU !== null && vm.cpu < filters.minCPU) {
         return false;
       }
+      
+      // RAM filter
+      if (filters.maxRAM !== null && vm.ram > filters.maxRAM) {
+        return false;
+      }
 
       // Price filter (in EUR)
       if (filters.maxPrice !== null && vm.priceEUR > filters.maxPrice) {
+        return false;
+      }
+      
+      // Processor filter
+      if (filters.processor && vm.processor !== filters.processor) {
+        return false;
+      }
+      
+      // Resources filter
+      if (filters.resources && vm.resources !== filters.resources) {
         return false;
       }
 
@@ -142,7 +161,7 @@ const Index = () => {
               
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={`table-${filters.search}-${filters.provider}-${filters.minCPU}-${filters.maxPrice}`}
+                  key={`table-${filters.search}-${filters.provider}-${filters.minCPU}-${filters.maxPrice}-${filters.processor}-${filters.resources}-${filters.maxRAM}`}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
