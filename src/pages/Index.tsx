@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -13,7 +14,7 @@ const fetchVMData = async (): Promise<VMPricing[]> => {
   try {
     console.log('Fetching data from Supabase...');
     
-    // Attempt to fetch from PricingList table
+    // Only fetch from PricingList table
     const { data: pricingData, error: pricingError } = await supabase
       .from('PricingList')
       .select('*');
