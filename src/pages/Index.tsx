@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -14,34 +13,21 @@ const fetchVMData = async (): Promise<VMPricing[]> => {
   try {
     console.log('Fetching data from Supabase...');
     
-    // Use VMPricing table (capital V) instead of PricingList as a fallback
+    // Attempt to fetch from PricingList table
     const { data: pricingData, error: pricingError } = await supabase
       .from('PricingList')
       .select('*');
 
     if (pricingError) {
       console.error('Error fetching from PricingList:', pricingError);
-      
-      // Try the other table as fallback
-      const { data: vmData, error: vmError } = await supabase
-        .from('VMPricing')
-        .select('*');
-        
-      if (vmError) {
-        console.error('Error fetching from VMPricing:', vmError);
-        throw new Error('Failed to fetch data from either table');
-      }
-      
-      console.log('Data from VMPricing:', vmData);
-      // Use type assertion with unknown first
-      return ((vmData as unknown) as SupabaseVMPricing[]).map(convertToVMPricing);
+      throw new Error('Failed to fetch data from PricingList table');
     }
     
     console.log('Data from PricingList:', pricingData);
     
-    // If we get an empty array but no error, try inserting sample data
-    if (pricingData && pricingData.length === 0) {
-      console.log('No data found, consider adding sample data');
+    // If we get an empty array but no error, use sample data
+    if (!pricingData || pricingData.length === 0) {
+      console.log('No data found in PricingList, using sample data');
       // If no data is found in Supabase, use sample data from vmData.ts
       return import('../data/vmData').then(module => module.vmData);
     }
@@ -50,7 +36,9 @@ const fetchVMData = async (): Promise<VMPricing[]> => {
     return ((pricingData as unknown) as SupabaseVMPricing[]).map(convertToVMPricing);
   } catch (error) {
     console.error('Error fetching VM data:', error);
-    throw error;
+    console.log('Falling back to sample data due to error');
+    // On any error, fall back to sample data
+    return import('../data/vmData').then(module => module.vmData);
   }
 };
 
