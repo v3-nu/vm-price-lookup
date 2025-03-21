@@ -1,6 +1,10 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { SearchIcon, X, Filter } from 'lucide-react';
 import { VMPricing } from '@/data/vmData';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TableFiltersProps {
   onFilterChange: (filters: {
@@ -61,8 +65,8 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
     onFilterChange({
       search,
       provider: provider === '' ? null : provider,
-      minCPU: minCPU === '' ? null : Number(minCPU),
-      maxPrice: maxPrice === '' ? null : Number(maxPrice),
+      minCPU: minCPU === null ? null : Number(minCPU),
+      maxPrice: maxPrice === null ? null : Number(maxPrice),
     });
   }, [search, provider, minCPU, maxPrice, onFilterChange]);
 
@@ -146,7 +150,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
                 <Input
                   type="number"
                   placeholder="Min CPU"
-                  value={minCPU || ""}
+                  value={minCPU ?? ""}
                   onChange={handleMinCPUChange}
                   min={0}
                   step={0.25}
@@ -161,7 +165,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
                 <Input
                   type="number"
                   placeholder="Max Price"
-                  value={maxPrice || ""}
+                  value={maxPrice ?? ""}
                   onChange={handleMaxPriceChange}
                   min={0}
                   step={1}
