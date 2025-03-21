@@ -1,10 +1,32 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import Header from '../components/Header';
 import VMTable from '../components/VMTable';
 import TableFilters from '../components/TableFilters';
-import { vmData } from '../data/vmData';
+import { supabase } from '../integrations/supabase/client';
+import { SupabaseVMPricing, convertToVMPricing } from '../types/supabase';
+import { VMPricing } from '../data/vmData';
+import { toast } from 'sonner';
+
+const fetchVMData = async (): Promise<VMPricing[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('PricingList')
+      .select('*');
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Convert the data to our app's format
+    return (data as SupabaseVMPricing[]).map(convertToVMPricing);
+  } catch (error) {
+    console.error('Error fetching VM data:', error);
+    throw error;
+  }
+};
 
 const Index = () => {
   const [filters, setFilters] = useState({
@@ -14,7 +36,21 @@ const Index = () => {
     maxPrice: null as number | null,
   });
 
+  const { data: vmData = [], isLoading, error } = useQuery({
+    queryKey: ['vmPricing'],
+    queryFn: fetchVMData,
+  });
+
+  // Show error toast if there's an error fetching data
+  useEffect(() => {
+    if (error) {
+      toast.error('Failed to load VM pricing data. Please try again later.');
+    }
+  }, [error]);
+
   const filteredData = useMemo(() => {
+    if (!vmData.length) return [];
+    
     return vmData.filter((vm) => {
       // Search filter (case insensitive)
       if (filters.search && !Object.values(vm).some(val => 
@@ -40,7 +76,7 @@ const Index = () => {
 
       return true;
     });
-  }, [filters]);
+  }, [vmData, filters]);
 
   const pageVariants = {
     initial: { opacity: 0 },
@@ -68,22 +104,30 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <TableFilters 
-            onFilterChange={setFilters} 
-            data={vmData} 
-          />
-          
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`table-${filters.search}-${filters.provider}-${filters.minCPU}-${filters.maxPrice}`}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.3 }}
-            >
-              <VMTable data={filteredData} />
-            </motion.div>
-          </AnimatePresence>
+          {isLoading ? (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+            </div>
+          ) : (
+            <>
+              <TableFilters 
+                onFilterChange={setFilters} 
+                data={vmData} 
+              />
+              
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`table-${filters.search}-${filters.provider}-${filters.minCPU}-${filters.maxPrice}`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <VMTable data={filteredData} />
+                </motion.div>
+              </AnimatePresence>
+            </>
+          )}
         </motion.div>
       </div>
     </motion.div>

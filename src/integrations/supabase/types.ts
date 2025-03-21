@@ -9,7 +9,147 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      PricingList: {
+        Row: {
+          Avg: number | null
+          "Bandwidth TB": number | null
+          Comments: string | null
+          Currency: string | null
+          Disk: string | null
+          "EUR (0%)": number | null
+          "EUR (25%)": number | null
+          ID: number
+          Locations: string | null
+          "Price (0% curr)": number | null
+          Processor: string | null
+          Provider: string | null
+          "Provider Avg": number | null
+          RAM: number | null
+          "Ratio 1:1": number | null
+          "Ratio 1:2": number | null
+          "Ratio 1:3": number | null
+          "Ratio 2:1": number | null
+          Resources: string | null
+          "Speed Gbit": number | null
+          vCPU: number | null
+        }
+        Insert: {
+          Avg?: number | null
+          "Bandwidth TB"?: number | null
+          Comments?: string | null
+          Currency?: string | null
+          Disk?: string | null
+          "EUR (0%)"?: number | null
+          "EUR (25%)"?: number | null
+          ID: number
+          Locations?: string | null
+          "Price (0% curr)"?: number | null
+          Processor?: string | null
+          Provider?: string | null
+          "Provider Avg"?: number | null
+          RAM?: number | null
+          "Ratio 1:1"?: number | null
+          "Ratio 1:2"?: number | null
+          "Ratio 1:3"?: number | null
+          "Ratio 2:1"?: number | null
+          Resources?: string | null
+          "Speed Gbit"?: number | null
+          vCPU?: number | null
+        }
+        Update: {
+          Avg?: number | null
+          "Bandwidth TB"?: number | null
+          Comments?: string | null
+          Currency?: string | null
+          Disk?: string | null
+          "EUR (0%)"?: number | null
+          "EUR (25%)"?: number | null
+          ID?: number
+          Locations?: string | null
+          "Price (0% curr)"?: number | null
+          Processor?: string | null
+          Provider?: string | null
+          "Provider Avg"?: number | null
+          RAM?: number | null
+          "Ratio 1:1"?: number | null
+          "Ratio 1:2"?: number | null
+          "Ratio 1:3"?: number | null
+          "Ratio 2:1"?: number | null
+          Resources?: string | null
+          "Speed Gbit"?: number | null
+          vCPU?: number | null
+        }
+        Relationships: []
+      }
+      VMPricing: {
+        Row: {
+          Avg: number | null
+          "Bandwidth TB": number | null
+          Comments: string | null
+          Currency: string | null
+          Disk: string | null
+          "EUR (0%)": number | null
+          "EUR (25%)": number | null
+          Locations: string | null
+          "Price (0% curr)": number | null
+          Processor: string | null
+          Provider: string | null
+          "Provider Avg": number | null
+          RAM: number | null
+          "Ratio 1:1": number | null
+          "Ratio 1:2": number | null
+          "Ratio 1:3": number | null
+          "Ratio 2:1": number | null
+          Resources: string | null
+          "Speed Gbit": number | null
+          vCPU: number | null
+        }
+        Insert: {
+          Avg?: number | null
+          "Bandwidth TB"?: number | null
+          Comments?: string | null
+          Currency?: string | null
+          Disk?: string | null
+          "EUR (0%)"?: number | null
+          "EUR (25%)"?: number | null
+          Locations?: string | null
+          "Price (0% curr)"?: number | null
+          Processor?: string | null
+          Provider?: string | null
+          "Provider Avg"?: number | null
+          RAM?: number | null
+          "Ratio 1:1"?: number | null
+          "Ratio 1:2"?: number | null
+          "Ratio 1:3"?: number | null
+          "Ratio 2:1"?: number | null
+          Resources?: string | null
+          "Speed Gbit"?: number | null
+          vCPU?: number | null
+        }
+        Update: {
+          Avg?: number | null
+          "Bandwidth TB"?: number | null
+          Comments?: string | null
+          Currency?: string | null
+          Disk?: string | null
+          "EUR (0%)"?: number | null
+          "EUR (25%)"?: number | null
+          Locations?: string | null
+          "Price (0% curr)"?: number | null
+          Processor?: string | null
+          Provider?: string | null
+          "Provider Avg"?: number | null
+          RAM?: number | null
+          "Ratio 1:1"?: number | null
+          "Ratio 1:2"?: number | null
+          "Ratio 1:3"?: number | null
+          "Ratio 2:1"?: number | null
+          Resources?: string | null
+          "Speed Gbit"?: number | null
+          vCPU?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

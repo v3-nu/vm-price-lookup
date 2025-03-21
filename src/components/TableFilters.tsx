@@ -1,9 +1,5 @@
-
-import { useState } from 'react';
-import { Search, Filter, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useMemo } from 'react';
+import { SearchIcon, X, Filter } from 'lucide-react';
 import { VMPricing } from '@/data/vmData';
 
 interface TableFiltersProps {
@@ -23,8 +19,12 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
   const [minCPU, setMinCPU] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
 
-  // Get unique providers for filter dropdown
-  const providers = Array.from(new Set(data.map(vm => vm.provider)));
+  // Extract all unique providers from data
+  const providers = useMemo(() => {
+    if (!data.length) return [];
+    const uniqueProviders = Array.from(new Set(data.map(vm => vm.provider)));
+    return uniqueProviders.filter(Boolean).sort();
+  }, [data]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -57,6 +57,15 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
     onFilterChange({ search: "", provider: null, minCPU: null, maxPrice: null });
   };
 
+  useEffect(() => {
+    onFilterChange({
+      search,
+      provider: provider === '' ? null : provider,
+      minCPU: minCPU === '' ? null : Number(minCPU),
+      maxPrice: maxPrice === '' ? null : Number(maxPrice),
+    });
+  }, [search, provider, minCPU, maxPrice, onFilterChange]);
+
   return (
     <div className="mb-6 space-y-4">
       <div className="flex flex-col sm:flex-row gap-4">
@@ -67,7 +76,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({ onFilterChange, data }) => 
             onChange={handleSearchChange}
             className="pl-10 pr-4 h-10 w-full border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all duration-200"
           />
-          <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+          <SearchIcon className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
           {search && (
             <button
               onClick={() => {
