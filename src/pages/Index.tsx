@@ -33,7 +33,8 @@ const fetchVMData = async (): Promise<VMPricing[]> => {
       }
       
       console.log('Data from VMPricing:', vmData);
-      return (vmData as SupabaseVMPricing[]).map(convertToVMPricing);
+      // Use type assertion with unknown first
+      return ((vmData as unknown) as SupabaseVMPricing[]).map(convertToVMPricing);
     }
     
     console.log('Data from PricingList:', pricingData);
@@ -41,10 +42,12 @@ const fetchVMData = async (): Promise<VMPricing[]> => {
     // If we get an empty array but no error, try inserting sample data
     if (pricingData && pricingData.length === 0) {
       console.log('No data found, consider adding sample data');
+      // If no data is found in Supabase, use sample data from vmData.ts
+      return import('../data/vmData').then(module => module.vmData);
     }
     
-    // Convert the data to our app's format
-    return (pricingData as SupabaseVMPricing[]).map(convertToVMPricing);
+    // Convert the data to our app's format - use type assertion with unknown first
+    return ((pricingData as unknown) as SupabaseVMPricing[]).map(convertToVMPricing);
   } catch (error) {
     console.error('Error fetching VM data:', error);
     throw error;

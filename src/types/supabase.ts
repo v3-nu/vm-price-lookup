@@ -1,6 +1,6 @@
 
 export interface SupabaseVMPricing {
-  ID: number;
+  ID?: number;
   Provider: string | null;
   Processor: string | null;
   Resources: string | null;
@@ -20,7 +20,7 @@ export interface SupabaseVMPricing {
 // Convert Supabase data to our app's data format
 export const convertToVMPricing = (data: SupabaseVMPricing) => {
   return {
-    id: `vm-${data.ID}`,
+    id: data.ID ? `vm-${data.ID}` : `vm-${Math.random().toString(36).substring(2, 11)}`,
     provider: data.Provider || 'Unknown',
     processor: data.Processor || 'Unknown',
     resources: data.Resources || 'Unknown',
